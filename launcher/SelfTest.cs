@@ -26,6 +26,13 @@ static class SelfTest
             var confirmation=Services.ParseGoogleConfirmation("<form action=\"https://drive.usercontent.google.com/download\"><input type=\"hidden\" name=\"id\" value=\"abc\"><input name=\"confirm\" value=\"t\"></form>");Assert(confirmation=="https://drive.usercontent.google.com/download?id=abc&confirm=t","Drive confirmation parsing failed");
             Assert(Services.ParseGoogleConfirmation("<form action=\"https://evil.example/download\"><input name=\"id\" value=\"abc\"></form>")==null,"Accepted untrusted confirmation origin");
             var rarFixture=Environment.GetEnvironmentVariable("FROSTBOUND_RAR_TEST");if(!string.IsNullOrEmpty(rarFixture)){var extracted=Path.Combine(root,"rar-test");Services.ExtractArchive(rarFixture,extracted,"rar",CancellationToken.None);Assert(Directory.EnumerateFiles(extracted,"*",SearchOption.AllDirectories).Any(),"RAR fixture extracted no files");}
+            Services.InstallFeatures(client);
+            var feature=Directory.EnumerateFiles(Path.Combine(client,"Interface","AddOns"),"*.lua",SearchOption.AllDirectories).First();
+            File.WriteAllText(feature,"-- user customization");
+            var saved=Path.Combine(client,"WTF","SavedVariables");Directory.CreateDirectory(saved);File.WriteAllText(Path.Combine(saved,"User.lua"),"preserve");
+            Services.InstallFeatures(client);
+            Assert(Directory.EnumerateFiles(Path.Combine(client,"FrostboundAddonBackups"),"*.lua",SearchOption.AllDirectories).Any(f=>File.ReadAllText(f)=="-- user customization"),"Addon update lost original file");
+            Assert(File.ReadAllText(Path.Combine(saved,"User.lua"))=="preserve","Feature install changed saved settings");
             File.WriteAllText(Path.Combine(AppContext.BaseDirectory,"self-test-results.txt"),"PASS: range resume, full-response restart, checksum rejection, archive traversal rejection, configuration preservation, client validation, public URL validation, shared ZIP/RAR path guards, Google Drive normalization/confirmation and confirmation origin rejection.");
         }finally{Directory.Delete(root,true);}
     }

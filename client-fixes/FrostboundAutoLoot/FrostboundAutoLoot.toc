@@ -1,0 +1,8 @@
+## Interface: 11200
+## Title: Frostbound Auto Loot
+## Notes: Visible AUTO LOOT switch in the original Interface Options. Preserves confirmation dialogs and group loot rules.
+## Author: Frostbound Plus
+## Version: 0.1.0
+## DefaultState: Enabled
+## SavedVariables: FrostboundAutoLootDB
+FrostboundAutoLoot.lua

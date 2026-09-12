@@ -40,7 +40,7 @@ public static class Services
             handler.AllowAutoRedirect=false;
             handler.ServerCertificateCustomValidationCallback=(request,cert,chain,errors)=> cert!=null && request.RequestUri?.Host==new Uri(manifest.RegistrationBaseUrl!).Host && CryptographicOperations.FixedTimeEquals(Convert.FromHexString(expected),SHA256.HashData(cert.RawData));
         }
-        var client=new HttpClient(handler){Timeout=TimeSpan.FromSeconds(40)}; client.DefaultRequestHeaders.UserAgent.ParseAdd("FrostboundPlus/0.1.1"); return client;
+        var client=new HttpClient(handler){Timeout=TimeSpan.FromSeconds(40)}; client.DefaultRequestHeaders.UserAgent.ParseAdd("FrostboundPlus/0.1.2"); return client;
     }
     public static async Task<Manifest> LoadManifest(CancellationToken ct)
     {
@@ -52,6 +52,31 @@ public static class Services
         var v=FileVersionInfo.GetVersionInfo(exe);
         if(v.FileMajorPart!=1 || v.FileMinorPart!=12 || v.FileBuildPart!=1 || v.FilePrivatePart!=5875) throw new InvalidDataException($"This client is {v.FileVersion ?? "unknown"}. Frostbound Plus requires Vanilla 1.12.1 (5875).");
         if(!Directory.Exists(Path.Combine(folder,"Data"))) throw new InvalidDataException("The client's Data folder is missing.");
+    }
+    public static void InstallFeatures(string folder)
+    {
+        var addons=Path.GetFullPath(Path.Combine(folder,"Interface","AddOns"));
+        var backup=Path.Combine(folder,"FrostboundAddonBackups",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fffffff"));
+        using var source=typeof(Services).Assembly.GetManifestResourceStream("FrostboundAddons.zip") ?? throw new IOException("Bundled client features are unavailable.");
+        using var archive=new ZipArchive(source,ZipArchiveMode.Read);
+        foreach(var entry in archive.Entries)
+        {
+            if(string.IsNullOrEmpty(entry.Name)) continue;
+            var target=SafeArchivePath(addons+Path.DirectorySeparatorChar,entry.FullName);
+            for(var check=new DirectoryInfo(Path.GetDirectoryName(target)!);check!=null;check=check.Parent)
+            {
+                if(check.Exists && (check.Attributes&FileAttributes.ReparsePoint)!=0) throw new IOException("An addon folder is redirected. Choose an ordinary client folder.");
+                if(check.FullName==Path.GetFullPath(folder))break;
+            }
+            if(File.Exists(target) && (File.GetAttributes(target)&FileAttributes.ReparsePoint)!=0) throw new IOException("An addon file is redirected.");
+            using var input=entry.Open();using var memory=new MemoryStream();input.CopyTo(memory);var bytes=memory.ToArray();
+            if(File.Exists(target))
+            {
+                if(File.ReadAllBytes(target).SequenceEqual(bytes))continue;
+                var original=Path.Combine(backup,entry.FullName.Replace('/',Path.DirectorySeparatorChar));Directory.CreateDirectory(Path.GetDirectoryName(original)!);File.Copy(target,original);
+            }
+            Directory.CreateDirectory(Path.GetDirectoryName(target)!);File.WriteAllBytes(target,bytes);
+        }
     }
     public static void Configure(string folder,string address)
     {

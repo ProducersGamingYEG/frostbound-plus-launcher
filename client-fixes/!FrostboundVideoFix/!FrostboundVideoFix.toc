@@ -1,0 +1,7 @@
+## Interface: 11200
+## Title: Frostbound Video Options Fix
+## Notes: Keeps Vanilla's resolution dropdown within its 32-button limit; preserves the active display mode.
+## Author: Frostbound Plus
+## Version: 0.1.0
+## DefaultState: Enabled
+FrostboundVideoFix.lua

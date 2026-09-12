@@ -11,3 +11,9 @@ Use addons for original Vanilla 1.12.1 / Interface 11200, not retail or Classic 
 The local Frostbound setup uses [ElvUI Modernized](https://github.com/Bluewhale1337/ElvUIModernized/tree/7acad19ae8274eeffd316087bce0b3ea8b92f686), a Vanilla backport: ElvUI0.85, Config1.01. Install !Compatibility, ElvUI, and ElvUI_Config together. Fully relaunch, then use /ec. Preserve your existing saved settings and graphics. The locally prepared copy disables automatic UI scaling to preserve the chosen scale. Optional APIs require an in-game compatibility check on the unmodified5875 client; no DLL/client patch is part of this setup.
 
 The launcher game download comes from the selected SoloCraft mirror. These optional addons are separate; game installation does not silently install them or overwrite an existing UI.
+
+## Built-in Frostbound features
+
+Launcher0.1.2 includes Auto Loot and the Vanilla video-dropdown correction. Fresh downloads install them automatically. For an existing client, choose its folder and click Install Auto Loot & video fix. Changed feature files are backed up; graphics, bindings and saved addon settings are preserved. Fully exit and relaunch after adding new addon folders.
+
+Auto Loot: Esc > Interface Options > AUTO LOOT beside Defaults, or /fbloot options. The toggle saves your choice. Shift suspends this addon while retaining native Vanilla Shift behavior. Binding confirmations and group loot choices remain manual.

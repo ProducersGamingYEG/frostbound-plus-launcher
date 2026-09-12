@@ -12,12 +12,12 @@ sealed class LauncherForm : Form
     readonly CancellationTokenSource lifetime=new(); CancellationTokenSource? operation; Manifest? manifest;
     public LauncherForm()
     {
-        Text="Frostbound Plus • 0.1.1"; ClientSize=new Size(760,480); MinimumSize=new Size(780,510); BackColor=Color.FromArgb(17,27,39); ForeColor=Color.White; Font=new Font("Segoe UI",11);
+        Text="Frostbound Plus • 0.1.2"; ClientSize=new Size(760,480); MinimumSize=new Size(780,510); BackColor=Color.FromArgb(17,27,39); ForeColor=Color.White; Font=new Font("Segoe UI",11);
         var layout=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false,Padding=new Padding(24),AutoScroll=true};Controls.Add(layout);
         layout.Controls.Add(new Label{Text="FROSTBOUND PLUS",Font=new Font("Segoe UI",25,FontStyle.Bold),AutoSize=true});
         layout.Controls.Add(new Label{Text="Vanilla 1.12.1 • Build 5875 • Level 60 • Fresh accounts",AutoSize=true,Margin=new Padding(0,8,0,22)});
         layout.Controls.Add(status); layout.Controls.Add(new Label{Text="Your client folder",AutoSize=true,Margin=new Padding(0,20,0,4)});layout.Controls.Add(folder);layout.Controls.Add(actions);
-        Add("Choose client",Choose);Add("Download client",()=>Run(()=>Install()));Add("Install archive",()=>Run(ImportArchive));Add("Open client source",()=>Run(OpenSource));Add("Register",()=>Account(false));Add("Recover account",()=>Account(true));Add("Refresh status",()=>Run(RefreshRealm));Add("Play",()=>Run(Play));
+        Add("Choose client",Choose);Add("Install Auto Loot & video fix",()=>Run(InstallFeatures));Add("Download client",()=>Run(()=>Install()));Add("Install archive",()=>Run(ImportArchive));Add("Open client source",()=>Run(OpenSource));Add("Register",()=>Account(false));Add("Recover account",()=>Account(true));Add("Refresh status",()=>Run(RefreshRealm));Add("Play",()=>Run(Play));
         var cancel=new Button{Text="Cancel download",AutoSize=true,BackColor=Color.FromArgb(45,64,82)};cancel.Click+=(_,_)=>operation?.Cancel();layout.Controls.Add(cancel);
         Directory.CreateDirectory(Services.StateDirectory);var settings=Path.Combine(Services.StateDirectory,"client-folder.txt");if(File.Exists(settings))folder.Text=File.ReadAllText(settings);
         Shown+=(_,_)=>Run(RefreshRealm);FormClosing+=(_,_)=>{operation?.Cancel();lifetime.Cancel();};
@@ -50,10 +50,11 @@ sealed class LauncherForm : Form
             else{using var http=Services.CreateHttp();http.Timeout=Timeout.InfiniteTimeSpan;await Services.Download(http,d,archive,progress,cts.Token);}
             status.Text="Extracting verified client…";await Task.Run(()=>Services.ExtractArchive(archive,staging,d.ArchiveType,cts.Token),cts.Token);
             var matches=Directory.EnumerateFiles(staging,"WoW.exe",SearchOption.AllDirectories).ToArray();if(matches.Length!=1)throw new InvalidDataException("Archive must contain exactly one WoW.exe client.");
-            var root=Path.GetDirectoryName(matches[0])!;Services.VerifyClient(root);Services.Configure(root,m.RealmAddress);Directory.Move(root,destination);SaveFolder(destination);status.Text="Client installed and verified. Ready to play.";
+            var root=Path.GetDirectoryName(matches[0])!;Services.VerifyClient(root);Services.Configure(root,m.RealmAddress);Services.InstallFeatures(root);Directory.Move(root,destination);SaveFolder(destination);status.Text="Client installed and verified. Ready to play.";
         }
         finally{operation=null;if(Directory.Exists(staging))Directory.Delete(staging,true);}
     }
+    Task InstallFeatures(){Services.VerifyClient(folder.Text);Services.InstallFeatures(folder.Text);status.Text="Auto Loot and video fix installed. Fully exit and reopen the game to load new addons.";return Task.CompletedTask;}
     Task Play(){var m=manifest??throw new InvalidOperationException("Refresh configuration before playing.");Services.VerifyClient(folder.Text);Services.Configure(folder.Text,m.RealmAddress);Process.Start(new ProcessStartInfo(Path.Combine(folder.Text,"WoW.exe")){WorkingDirectory=folder.Text,UseShellExecute=true});status.Text="Game started. Use your Frostbound Plus account to sign in.";return Task.CompletedTask;}
     void Account(bool recovery){if(manifest==null){MessageBox.Show(this,"Refresh configuration first.");return;}if(string.IsNullOrWhiteSpace(manifest.RegistrationBaseUrl)){MessageBox.Show(this,"The realm operator has not configured the account service.");return;}using var dialog=new AccountForm(manifest,recovery);dialog.ShowDialog(this);}
 }
