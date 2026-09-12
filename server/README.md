@@ -29,3 +29,9 @@ For integration validation, use only a disposable Classic schema clone and an in
 - Inspect HTTPS certificate chain and endpoint host using the launcher; never turn off certificate validation.
 
 The .NET 9 runtime is retained to match the authorized project stack; refresh the base runtime before long-term public hosting as part of deployment maintenance.
+
+### Executable disposable integration suite
+
+The integration suite is implemented in tests/Integration.cs and ran successfully against an isolated MariaDB 10.11 container. It creates Classic-named fixture databases from scratch and refuses existing schemas by using CREATE DATABASE without IF NOT EXISTS. It uses a hardcoded **test-only** password and loopback address; never configure it against an existing database. Start an isolated container with an ephemeral loopback port and the password `disposable-test-only`, set `FROSTBOUND_DISPOSABLE_TEST_PORT` only for the test process, then run the same test command. Remove that test container and its anonymous volume afterward. With no test-port environment variable, only the pure suite runs. The fake transport never opens an SMTP connection.
+
+Validated: 14 pure assertions and 22 integration assertions, including SQL rollback, concurrent one-time recovery, expiry/attempt limits, cooldown, no privileged creation, bot counts and fake SMTP failure. HTTP/TLS deployment checks still belong to the runtime owner.

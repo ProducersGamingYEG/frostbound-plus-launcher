@@ -21,7 +21,7 @@ await app.Services.GetRequiredService<AccountService>().ValidateStorage();
 app.Use(async (ctx,next) => {
     ctx.Response.Headers.CacheControl="no-store";
     try { await next(ctx); }
-    catch (ArgumentException e) { ctx.Response.StatusCode=400; await ctx.Response.WriteAsJsonAsync(new {message=e.Message}); }
+    catch (CredentialException e) { ctx.Response.StatusCode=400; await ctx.Response.WriteAsJsonAsync(new {message=e.Message}); }
     catch { ctx.Response.StatusCode=503; await ctx.Response.WriteAsJsonAsync(new {message="Service temporarily unavailable. Please try again later."}); }
 });
 app.UseRateLimiter();
@@ -47,7 +47,7 @@ app.MapPost("/register", async (CompleteRequest r, AccountService s) => {
 }).RequireRateLimiting("account");
 app.MapPost("/recovery/request", (RecoveryRequest r,MailQueue q) => {
     // Identical response for unknown accounts, mismatches, cooldowns and SMTP failures.
-    try { q.Enqueue(new(Credentials.User(r.Username),Credentials.Email(r.Email),"recover")); } catch (ArgumentException) { }
+    try { q.Enqueue(new(Credentials.User(r.Username),Credentials.Email(r.Email),"recover")); } catch (CredentialException) { }
     return Results.Ok(new {message=Sent});
 }).RequireRateLimiting("account");
 app.MapPost("/recovery/complete", async (CompleteRequest r,AccountService s) => {
@@ -58,4 +58,5 @@ app.Run();
 public record SendRequest(string? Email,string? Purpose,string? Username);
 public record RecoveryRequest(string? Username,string? Email);
 public record CompleteRequest(string? Username,string? Email,string? Password,string? VerificationCode);
+
 

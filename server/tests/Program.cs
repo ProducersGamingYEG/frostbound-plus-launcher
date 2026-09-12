@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 static void Check(bool condition,string name) { if (!condition) throw new Exception("FAILED: "+name); Console.WriteLine("PASS: "+name); }
-static void Reject(Action action,string name) { try { action(); } catch (ArgumentException) { Console.WriteLine("PASS: "+name); return; } throw new Exception("FAILED: "+name); }
+static void Reject(Action action,string name) { try { action(); } catch (CredentialException) { Console.WriteLine("PASS: "+name); return; } throw new Exception("FAILED: "+name); }
 Check(Credentials.User("Explorer_1")=="EXPLORER_1","username canonicalization");
 Reject(()=>Credentials.User("name';--"),"reject SQL punctuation");
 Reject(()=>Credentials.User(new string('A',17)),"classic username maximum");
@@ -20,3 +20,5 @@ Check(!CryptographicOperations.FixedTimeEquals(hash,Credentials.CodeHash("test-s
 Check(!CryptographicOperations.FixedTimeEquals(hash,Credentials.CodeHash("test-secret","register","OTHER","e@example.com","123456")),"code username binding");
 Check(!CryptographicOperations.FixedTimeEquals(hash,Credentials.CodeHash("test-secret","register","EXPLORER","other@example.com","123456")),"code email binding");
 Console.WriteLine("All pure tests passed. No database connections or mail transports used.");
+
+if (Environment.GetEnvironmentVariable("FROSTBOUND_DISPOSABLE_TEST_PORT") is { } port) await Integration.Run(port);
