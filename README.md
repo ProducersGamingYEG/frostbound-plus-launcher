@@ -7,3 +7,5 @@ The launcher imports an existing client or downloads the operator-selected SoloC
 Public connectivity is still undergoing deployment verification; do not treat source publication as a completed public release.
 
 See launcher/README.md and server/README.md for build and validation details.
+
+Optional quest-helper and interface setup: [Client addons](CLIENT-ADDONS.md).
