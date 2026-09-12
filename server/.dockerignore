@@ -1,0 +1,7 @@
+bin/
+obj/
+.tests/
+*.pfx
+*.pem
+*.key
+.env

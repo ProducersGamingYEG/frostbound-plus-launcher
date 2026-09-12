@@ -1,0 +1,13 @@
+# EXAMPLE ONLY. Set real values in a private environment file OUTSIDE the published tree.
+AUTH_DATABASE=Server=SQL_HOST;Database=classicrealmd;User ID=SERVICE_USER;Password=PRIVATE;SslMode=VerifyFull
+CODE_HMAC_KEY=GENERATE_AT_LEAST_32_RANDOM_CHARACTERS_PRIVATELY
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=PRIVATE
+SMTP_PASSWORD=PRIVATE_APP_PASSWORD
+SMTP_FROM=PRIVATE
+WORLD_HOST=WORLD_HOST
+WORLD_PORT=8085
+ASPNETCORE_URLS=https://+:8443
+ASPNETCORE_Kestrel__Certificates__Default__Path=/run/secrets/service.pfx
+ASPNETCORE_Kestrel__Certificates__Default__Password=PRIVATE
