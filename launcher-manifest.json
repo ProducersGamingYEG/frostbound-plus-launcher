@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "launcherVersion": "0.1.1",
+  "realmName": "Frostbound Plus",
+  "realmAddress": "68.151.232.66:3724",
+  "clientBuild": 5875,
+  "registrationBaseUrl": "https://68.151.232.66:8090",
+  "registrationCertificateSha256": "e94203f904d17d19e6bec0fdb76525394d401c5250805e5c04341453c861ec62",
+  "clientDownload": {
+    "url": "https://drive.google.com/file/d/1l0o3ugn2R1cEcNLUFiGzHWE2xHhWFuEl/view",
+    "sha256": "ace13bea71e1c830a4431e6925a46673e5ed2a6a80d403caef37279e94841239",
+    "sizeBytes": 5258755392,
+    "archiveType": "rar"
+  }
+}
